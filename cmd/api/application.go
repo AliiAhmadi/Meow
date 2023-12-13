@@ -1,4 +1,4 @@
-package application
+package main
 
 import (
 	"Meow/config"
@@ -6,6 +6,6 @@ import (
 )
 
 type Application struct {
-	Config config.Config
+	Config *config.Config
 	Logger *log.Logger
 }
