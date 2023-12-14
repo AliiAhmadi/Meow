@@ -1,4 +1,4 @@
-package main
+package application
 
 import (
 	"fmt"
@@ -10,5 +10,5 @@ import (
 func (app *Application) healthcheckHandler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintln(writer, "status: available")
 	fmt.Fprintf(writer, "environment: %s\n", app.Config.Env)
-	fmt.Fprintf(writer, "version: %s\n", version)
+	fmt.Fprintf(writer, "version: %s\n", app.Version)
 }

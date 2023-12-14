@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Meow/application"
 	"Meow/config"
 	"flag"
 	"log"
@@ -30,22 +31,18 @@ func main() {
 
 	// Declare an instance of the application struct, containing the config struct and
 	// the logger.
-	application := &Application{
-		Config: cfg,
-		Logger: logger,
+	application := &application.Application{
+		Config:  cfg,
+		Logger:  logger,
+		Version: version,
 	}
-
-	// Declare a new servemux and add a /v1/healthcheck route which dispatches requests
-	// to the healthcheckHandler method.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/healthcheck", application.healthcheckHandler)
 
 	// Declare a HTTP server with some sensible timeout settings, which listens on the
 	// port provided in the config struct and uses the servemux we created above as the
-	// handler.
+	// handler. use the httprouter instance returned by app.routes() as the server handler.
 	srv := &http.Server{
 		Addr:         cfg.GetSport(),
-		Handler:      mux,
+		Handler:      application.Routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
