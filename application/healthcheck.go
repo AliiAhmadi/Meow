@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -9,14 +8,18 @@ import (
 // application status, operating environment and version.
 func (app *Application) healthcheckHandler(writer http.ResponseWriter, request *http.Request) {
 
-	// Create a json response for health check request.
-	js := `{"status": "available", "environment": %q, "version": %q}`
-	js = fmt.Sprintf(js, app.Config.Env, app.Version)
+	// Create a map for data we want to send.
+	data := map[string]string{
+		"status":      "available",
+		"environment": app.Config.Env,
+		"version":     app.Version,
+	}
 
-	// Set the "Content-Type: application/json" header on the response.
-	// Default of that is "text/plain; charset=utf-8"
-	writer.Header().Set("Content-Type", "application/json")
-
-	// Write the JSON to response body.
-	writer.Write([]byte(js))
+	// Using writeJSON() helper to write data and set
+	// headers to HTTP response body.
+	err := app.writeJSON(writer, http.StatusOK, data, nil)
+	if err != nil {
+		app.Logger.Println(err)
+		http.Error(writer, "Internal server error", http.StatusInternalServerError)
+	}
 }
