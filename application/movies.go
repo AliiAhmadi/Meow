@@ -1,8 +1,10 @@
 package application
 
 import (
+	"Meow/internal/data"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // Add createMovieHandler for the "POST /v1/movies" endpoint.
@@ -20,5 +22,20 @@ func (app *Application) showMovieHandler(writer http.ResponseWriter, request *ht
 		return
 	}
 
-	fmt.Fprintf(writer, "here is movie with %d id", id)
+	// Create a movie with dummy data.
+	movie := data.Movie{
+		ID:        id,
+		CreatedAt: time.Now(),
+		Title:     "Hello :-)",
+		Runtime:   180,
+		Genres:    []string{"one", "two", "three"},
+		Version:   1,
+	}
+
+	// Encoding struct to json and write it in HTTP response body.
+	err = app.writeJSON(writer, http.StatusOK, movie, nil)
+	if err != nil {
+		app.Logger.Println(err)
+		http.Error(writer, "Internal server error", http.StatusInternalServerError)
+	}
 }
