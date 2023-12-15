@@ -33,7 +33,7 @@ func (app *Application) showMovieHandler(writer http.ResponseWriter, request *ht
 	}
 
 	// Encoding struct to json and write it in HTTP response body.
-	err = app.writeJSON(writer, http.StatusOK, movie, nil)
+	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
 		app.Logger.Println(err)
 		http.Error(writer, "Internal server error", http.StatusInternalServerError)

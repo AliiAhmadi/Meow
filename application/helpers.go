@@ -9,6 +9,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Define an envelope type.
+type envelope map[string]interface{}
+
 // Retrive the "id" parameter from the current request context.
 // convert it from string to int and return it.
 func (app *Application) readIdParam(request *http.Request) (int64, error) {
@@ -31,7 +34,7 @@ func (app *Application) readIdParam(request *http.Request) (int64, error) {
 }
 
 // Define writeJSON() function for json encoding and write in response body.
-func (app *Application) writeJSON(writer http.ResponseWriter, status int, value interface{}, headers http.Header) error {
+func (app *Application) writeJSON(writer http.ResponseWriter, status int, value envelope, headers http.Header) error {
 	// Encoding data to json and check for errors.
 	js, err := json.Marshal(value)
 	if err != nil {
