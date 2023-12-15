@@ -18,7 +18,7 @@ func (app *Application) showMovieHandler(writer http.ResponseWriter, request *ht
 	// Get id from readIdParam helper.
 	id, err := app.readIdParam(request)
 	if err != nil {
-		http.NotFound(writer, request)
+		app.notFoundResponse(writer, request)
 		return
 	}
 
@@ -35,7 +35,6 @@ func (app *Application) showMovieHandler(writer http.ResponseWriter, request *ht
 	// Encoding struct to json and write it in HTTP response body.
 	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
-		app.Logger.Println(err)
-		http.Error(writer, "Internal server error", http.StatusInternalServerError)
+		app.serverErrorResponse(writer, request, err)
 	}
 }
