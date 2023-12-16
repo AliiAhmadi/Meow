@@ -2,7 +2,6 @@ package application
 
 import (
 	"Meow/internal/data"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -19,9 +18,9 @@ func (app *Application) createNewMovieHandler(writer http.ResponseWriter, reques
 		Genres  []string `json:"genres"`
 	}
 
-	// Initialize a new json.Decoder instance which reads from the request body, and
-	// then use the Decode() method to decode the body contents into the input struct.
-	err := json.NewDecoder(request.Body).Decode(&input)
+	// Using readJSON() helper to decode and also get better error message
+	// if any error exist in decoding.
+	err := app.readJSON(writer, request, &input)
 	if err != nil {
 		app.errorResponse(writer, request, http.StatusBadRequest, err.Error())
 		return
