@@ -22,7 +22,7 @@ func (app *Application) createNewMovieHandler(writer http.ResponseWriter, reques
 	// if any error exist in decoding.
 	err := app.readJSON(writer, request, &input)
 	if err != nil {
-		app.errorResponse(writer, request, http.StatusBadRequest, err.Error())
+		app.badRequestResponse(writer, request, err)
 		return
 	}
 
