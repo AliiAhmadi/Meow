@@ -2,7 +2,7 @@ package application
 
 import (
 	"Meow/internal/data"
-	Validator "Meow/internal/validator"
+	"Meow/internal/validator"
 	"fmt"
 	"net/http"
 	"time"
@@ -27,33 +27,23 @@ func (app *Application) createNewMovieHandler(writer http.ResponseWriter, reques
 		return
 	}
 
+	// Create a new movie from anonymous struct
+	movie := &data.Movie{
+		Title:   input.Title,
+		Year:    input.Year,
+		Runtime: input.Runtime,
+		Genres:  input.Genres,
+	}
+
 	// Initialize a new Validator instance.
-	validator := Validator.New()
+	v := validator.New()
 
-	// Use the Check() method to execute our validation checks.
-
-	// Title
-	validator.Check(input.Title != "", "title", "must be provided")
-	validator.Check(len(input.Title) <= 500, "title", "must not be more than 500 bytes long")
-
-	// Year
-	validator.Check(input.Year != 0, "year", "must be provided")
-	validator.Check(input.Year >= 1800, "year", "must be greater than 1888")
-	validator.Check(input.Year <= int32(time.Now().Year()), "year", "invalid year")
-
-	// Runtime
-	validator.Check(input.Runtime != 0, "runtime", "must be provided")
-	validator.Check(input.Runtime > 0, "runtime", "must be a positive integer")
-
-	// Genres
-	validator.Check(input.Genres != nil, "genres", "must be provided")
-	validator.Check(len(input.Genres) >= 1, "genres", "must contain at least 1 genre")
-	validator.Check(len(input.Genres) <= 5, "genres", "must not contain more than 5 genres")
-	validator.Check(Validator.Unique(input.Genres), "genres", "must not contain duplicate values")
+	// Using movieValidator for validating input json.
+	validator.MovieValidator(v, movie)
 
 	// Use the Valid() method to see if any of the checks failed.
-	if !validator.Valid() {
-		app.failedValidationResponse(writer, request, validator.Errors)
+	if !v.Valid() {
+		app.failedValidationResponse(writer, request, v.Errors)
 		return
 	}
 
