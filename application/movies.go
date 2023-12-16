@@ -12,10 +12,10 @@ func (app *Application) createNewMovieHandler(writer http.ResponseWriter, reques
 	// Declare an anonymous struct to hold the information that we expect to be in the
 	// HTTP request body
 	var input struct {
-		Title   string   `json:"title"`
-		Year    int32    `json:"year"`
-		Runtime int32    `json:"runtime"`
-		Genres  []string `json:"genres"`
+		Title   string       `json:"title"`
+		Year    int32        `json:"year"`
+		Runtime data.Runtime `json:"runtime"`
+		Genres  []string     `json:"genres"`
 	}
 
 	// Using readJSON() helper to decode and also get better error message
