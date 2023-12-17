@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 // Declare a string containing the application version number.
@@ -23,11 +25,32 @@ func main() {
 	// corresponding flags are provided.
 	flag.IntVar(&cfg.Port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.Env, "env", "development", "Environment (development|staging|production)")
+
+	// Read the DSN from command line flags into config struct.
+	flag.StringVar(&cfg.DB.DSN, "dsn", os.Getenv("dsn"), "PostgreSQL DSN")
+
+	// Read the connection pool settings from command-line flags.
+	flag.IntVar(&cfg.DB.MaxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
+	flag.IntVar(&cfg.DB.MaxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
+	flag.StringVar(&cfg.DB.MaxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max idle time")
 	flag.Parse()
 
 	// Initialize a new logger which writes messages to the standard out stream,
 	// prefixed with the current date and time.
 	logger := log.New(os.Stdout, "Log: ", log.Ldate|log.Ltime)
+
+	// Get connection pool from OpenDB() function.
+	// If any error exists, we should exit application immediately.
+	db, err := config.OpenDB(cfg)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	// defering closing database pool.
+	defer db.Close()
+
+	// Also log a message to say that the connection pool has been successfully
+	// established.
+	logger.Printf("database connection pool established")
 
 	// Declare an instance of the application struct, containing the config struct and
 	// the logger.
@@ -50,6 +73,6 @@ func main() {
 
 	// Start the http server.
 	logger.Printf("starting %s server on %s", cfg.Env, srv.Addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	logger.Fatal(err)
 }
