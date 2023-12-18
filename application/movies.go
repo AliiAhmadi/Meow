@@ -3,9 +3,9 @@ package application
 import (
 	"Meow/internal/data"
 	"Meow/internal/validator"
+	"errors"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 // Add createMovieHandler for the "POST /v1/movies" endpoint.
@@ -80,14 +80,16 @@ func (app *Application) showMovieHandler(writer http.ResponseWriter, request *ht
 		return
 	}
 
-	// Create a movie with dummy data.
-	movie := data.Movie{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Title:     "Hello :-)",
-		Runtime:   180,
-		Genres:    []string{"one", "two", "three"},
-		Version:   1,
+	// Use Get method to check for movie with this id.
+	movie, err := app.Models.Movies.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(writer, request)
+		default:
+			app.serverErrorResponse(writer, request, err)
+		}
+		return
 	}
 
 	// Encoding struct to json and write it in HTTP response body.
