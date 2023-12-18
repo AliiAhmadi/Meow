@@ -3,6 +3,7 @@ package main
 import (
 	"Meow/application"
 	"Meow/config"
+	"Meow/internal/data"
 	"flag"
 	"log"
 	"net/http"
@@ -58,6 +59,7 @@ func main() {
 		Config:  cfg,
 		Logger:  logger,
 		Version: version,
+		Models:  data.NewModels(db),
 	}
 
 	// Declare a HTTP server with some sensible timeout settings, which listens on the
