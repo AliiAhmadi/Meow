@@ -35,6 +35,9 @@ var (
 	UPDATE_QUERY = `UPDATE movies SET title = $1, year = $2, runtime = $3,
 	genres = $4, version = version + 1 WHERE id = $5 RETURNING version
 	`
+
+	// Delete sql query for delete a record.
+	DELETE_QUERY = `DELETE FROM movies WHERE id = $1`
 )
 
 // Define a MovieModel struct type which wraps a sql.DB connection pool.
@@ -123,5 +126,32 @@ func (movieModel MovieModel) Update(movie *Movie) error {
 
 // Add a placeholder method for deleting a specific record from the movies table.
 func (movieModel MovieModel) Delete(id int64) error {
+	// Return an error if the movie id less than 1.
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	// Execute the SQL query using the Exec() method, passing in the id variable as
+	// the value for the placeholder parameter. The Exec() method returns a sql.Result
+	// object.
+	result, err := movieModel.DB.Exec(DELETE_QUERY, id)
+	if err != nil {
+		return err
+	}
+
+	// Call the RowsAffected() method on the sql.Result object to get the number of rows
+	// affected by the query.
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	// If no rows were affected, we know that the movies table didn't contain a record
+	// with the provided ID at the moment we tried to delete it.
+	if rows == 0 {
+		return ErrRecordNotFound
+	}
+
+	// Ok.
 	return nil
 }
