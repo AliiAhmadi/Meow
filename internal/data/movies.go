@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/lib/pq"
@@ -22,6 +23,11 @@ var (
 	// the system-generated data.
 	INSERT_QUERY = `INSERT INTO movies (title, year, runtime, genres) 
 	VALUES ($1, $2, $3, $4) RETURNING id, created_at, version
+	`
+
+	// Define the SQL query for retrieving the movie data.
+	GET_QUERY = `SELECT id, created_at, title, year, runtime, genres, version
+	FROM movies WHERE id = $1
 	`
 )
 
@@ -47,7 +53,45 @@ func (movieModel MovieModel) Insert(movie *Movie) error {
 
 // Add a placeholder method for fetching a specific record from the movies table.
 func (movieModel MovieModel) Get(id int64) (*Movie, error) {
-	return nil, nil
+	// The PostgreSQL bigserial type that we're using for the movie ID starts
+	// auto-incrementing at 1 by default, so we know that no movies will have ID values
+	// less than that. To avoid making an unnecessary database call, we take a shortcut
+	// and return an ErrRecordNotFound error straight away.
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	// Declare an empty movie struct to hold the data returned by the query.
+	var movie Movie
+
+	// Execute the query using the QueryRow() method, passing in the provided id value
+	// as a placeholder parameter, and scan the response data into the fields of the
+	// Movie struct.
+	err := movieModel.DB.QueryRow(GET_QUERY, id).Scan(
+		&movie.ID,
+		&movie.CreatedAt,
+		&movie.Title,
+		&movie.Year,
+		&movie.Runtime,
+		pq.Array(&movie.Genres),
+		&movie.Version,
+	)
+
+	// Handle any errors. If there was no matching movie found, Scan() will return
+	// a sql.ErrNoRows error. We check for this and return our custom ErrRecordNotFound
+	// error instead.
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+
+		default:
+			return nil, err
+		}
+	}
+
+	// At this point every things ok. so return movie struct.
+	return &movie, nil
 }
 
 // Add a placeholder method for updating a specific record in the movies table.
