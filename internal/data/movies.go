@@ -29,6 +29,12 @@ var (
 	GET_QUERY = `SELECT id, created_at, title, year, runtime, genres, version
 	FROM movies WHERE id = $1
 	`
+
+	// Declare the SQL query for updating the record and returning the new version
+	// number.
+	UPDATE_QUERY = `UPDATE movies SET title = $1, year = $2, runtime = $3,
+	genres = $4, version = version + 1 WHERE id = $5 RETURNING version
+	`
 )
 
 // Define a MovieModel struct type which wraps a sql.DB connection pool.
@@ -96,6 +102,22 @@ func (movieModel MovieModel) Get(id int64) (*Movie, error) {
 
 // Add a placeholder method for updating a specific record in the movies table.
 func (movieModel MovieModel) Update(movie *Movie) error {
+
+	// Create an slice of interfaces include parameters we want to pass QueryRow() function in follow.
+	args := []interface{}{
+		movie.Title,
+		movie.Year,
+		movie.Runtime,
+		pq.Array(movie.Genres),
+		movie.ID,
+	}
+
+	// Execute Update query and scan new version that returned from database to movie.Version
+	err := movieModel.DB.QueryRow(UPDATE_QUERY, args...).Scan(&movie.Version)
+	if err != nil {
+		return err
+	}
+	// Ok.
 	return nil
 }
 
