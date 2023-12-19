@@ -1,11 +1,13 @@
 package application
 
 import (
+	"Meow/internal/validator"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -143,4 +145,52 @@ func (app *Application) readJSON(writer http.ResponseWriter, request *http.Reque
 
 	// Decoding finished without any error.
 	return nil
+}
+
+// The readString() helper returns a string value from the query string, or the provided
+// default value if no matching key could be found.
+func (app *Application) readString(qs url.Values, key string, defaultValue string) string {
+	// Extract the value for a given key from the query string.
+	s := qs.Get(key)
+
+	// If value does not exist then return the default value.
+	if s == "" {
+		return defaultValue
+	}
+
+	// Return finded value.
+	return s
+}
+
+// The readCSV() helper reads a string value from the query string and then splits it
+// into a slice on the comma character.
+func (app *Application) readCSV(qs url.Values, key string, defaultValue []string) []string {
+	// Extract not splited value in string format from query string.
+	s := qs.Get(key)
+
+	// Check if value not exist return default value.
+	if s == "" {
+		return defaultValue
+	}
+
+	// Split values with ',' to a slice of strings.
+	return strings.Split(s, ",")
+}
+
+// The readInt() helper reads a string value from the query string and converts it to an
+// integer before returning.
+func (app *Application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+	// Extract the value from the query string.
+	s := qs.Get(key)
+
+	// Try convert the value to an int. If this fails add an
+	// error message to validator.
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	// Ok.
+	return i
 }
