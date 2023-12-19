@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -73,10 +74,15 @@ func (movieModel MovieModel) Get(id int64) (*Movie, error) {
 	// Declare an empty movie struct to hold the data returned by the query.
 	var movie Movie
 
+	// Use the context.WithTimeout() function to create a context.Context which carries a
+	// 3-second timeout deadline.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	// Execute the query using the QueryRow() method, passing in the provided id value
 	// as a placeholder parameter, and scan the response data into the fields of the
 	// Movie struct.
-	err := movieModel.DB.QueryRow(GET_QUERY, id).Scan(
+	err := movieModel.DB.QueryRowContext(ctx, GET_QUERY, id).Scan(
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.Title,
