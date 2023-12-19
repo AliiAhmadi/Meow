@@ -57,8 +57,12 @@ func (movieModel MovieModel) Insert(movie *Movie) error {
 		pq.Array(movie.Genres),
 	}
 
+	// Create a context function for 3 second timeout.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	// Set returned values from database into movie instance or return any error if exists.
-	return movieModel.DB.QueryRow(INSERT_QUERY, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)
+	return movieModel.DB.QueryRowContext(ctx, INSERT_QUERY, args...).Scan(&movie.ID, &movie.CreatedAt, &movie.Version)
 }
 
 // Add a placeholder method for fetching a specific record from the movies table.
@@ -122,8 +126,12 @@ func (movieModel MovieModel) Update(movie *Movie) error {
 		movie.Version,
 	}
 
+	// Define context.Context and cancel for set 3-second timeout for UPDATE_QUERY.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	// Execute Update query and scan new version that returned from database to movie.Version
-	err := movieModel.DB.QueryRow(UPDATE_QUERY, args...).Scan(&movie.Version)
+	err := movieModel.DB.QueryRowContext(ctx, UPDATE_QUERY, args...).Scan(&movie.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -143,10 +151,15 @@ func (movieModel MovieModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 
+	// Declare a ctx (context) for define a 3-second timeout for Delete query.
+	// Also get a cancel function for cancel query when time riched 3 second.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	// Execute the SQL query using the Exec() method, passing in the id variable as
 	// the value for the placeholder parameter. The Exec() method returns a sql.Result
 	// object.
-	result, err := movieModel.DB.Exec(DELETE_QUERY, id)
+	result, err := movieModel.DB.ExecContext(ctx, DELETE_QUERY, id)
 	if err != nil {
 		return err
 	}
