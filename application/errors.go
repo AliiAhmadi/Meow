@@ -61,3 +61,9 @@ func (app Application) badRequestResponse(writer http.ResponseWriter, request *h
 func (app *Application) failedValidationResponse(writer http.ResponseWriter, request *http.Request, errors map[string]string) {
 	app.errorResponse(writer, request, http.StatusUnprocessableEntity, errors)
 }
+
+// When a conflict occures in write data in database
+// we send a conflict error with 409 status code.
+func (app *Application) editConflictResponse(writer http.ResponseWriter, request *http.Request) {
+	app.errorResponse(writer, request, http.StatusConflict, "unable to update the record, please try again")
+}

@@ -73,7 +73,12 @@ func (app *Application) updateMovieHandler(writer http.ResponseWriter, request *
 	// Passing updated movie instance to Update() method.
 	err = app.Models.Movies.Update(movie)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(writer, request)
+		default:
+			app.serverErrorResponse(writer, request, err)
+		}
 		return
 	}
 

@@ -5,9 +5,12 @@ import (
 	"errors"
 )
 
-// Define a custom ErrRecordNotFound error.
 var (
+	// Define a custom ErrRecordNotFound error.
 	ErrRecordNotFound = errors.New("record not found")
+
+	// Define ErrEditConflict and return it when two threads try change same data at same time.
+	ErrEditConflict = errors.New("edit conflict")
 )
 
 // Create a model struct which wraps the MovieModel.

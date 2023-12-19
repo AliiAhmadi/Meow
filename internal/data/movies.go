@@ -33,7 +33,7 @@ var (
 	// Declare the SQL query for updating the record and returning the new version
 	// number.
 	UPDATE_QUERY = `UPDATE movies SET title = $1, year = $2, runtime = $3,
-	genres = $4, version = version + 1 WHERE id = $5 RETURNING version
+	genres = $4, version = version + 1 WHERE version = $6 AND id = $5 RETURNING version
 	`
 
 	// Delete sql query for delete a record.
@@ -113,12 +113,18 @@ func (movieModel MovieModel) Update(movie *Movie) error {
 		movie.Runtime,
 		pq.Array(movie.Genres),
 		movie.ID,
+		movie.Version,
 	}
 
 	// Execute Update query and scan new version that returned from database to movie.Version
 	err := movieModel.DB.QueryRow(UPDATE_QUERY, args...).Scan(&movie.Version)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
 	}
 	// Ok.
 	return nil
