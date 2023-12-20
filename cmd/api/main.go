@@ -6,6 +6,7 @@ import (
 	"Meow/internal/data"
 	jlog "Meow/log"
 	"flag"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -68,6 +69,7 @@ func main() {
 	srv := &http.Server{
 		Addr:         cfg.GetSport(),
 		Handler:      application.Routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
