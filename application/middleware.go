@@ -2,7 +2,9 @@ package application
 
 import (
 	"fmt"
+	"net"
 	"net/http"
+	"sync"
 
 	"golang.org/x/time/rate"
 )
@@ -36,21 +38,43 @@ func (app *Application) recoverPanic(next http.Handler) http.Handler {
 
 // rateLimit() middleware
 func (app *Application) rateLimit(next http.Handler) http.Handler {
-	// Initialize a new rate limiter which allows an average of 2 requests per second,
-	// with a maximum of 4 requests in a single ‘burst’.
-	limiter := rate.NewLimiter(2, 4)
+	// Declare a mutex and a map to hold the clients' IP addresses and rate limiters.
+	var (
+		mu      sync.Mutex
+		clients = make(map[string]*rate.Limiter)
+	)
 
 	// The function we are returning is a closure, which 'closes over' the limiter
 	// variable.
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		// Extract the client's IP address from the request.
+		ip, _, err := net.SplitHostPort(request.RemoteAddr)
+		if err != nil {
+			app.serverErrorResponse(writer, request, err)
+			return
+		}
 
-		// Call limiter.Allow() to see if the request is permitted, and if it's not,
-		// then we call the rateLimitExceededResponse() helper to return a 429 Too Many
-		// Requests response (we will create this helper in a minute).
-		if !limiter.Allow() {
+		// Lock the mutex to prevent this code from being executed concurrently.
+		mu.Lock()
+
+		// Check to see if the IP address already exists in the map. If it doesn't, then
+		// initialize a new rate limiter and add the IP address and limiter to the map.
+		if _, found := clients[ip]; !found {
+			clients[ip] = rate.NewLimiter(2, 4)
+		}
+
+		// Call the Allow() method on the rate limiter for the current IP address. If
+		// the request isn't allowed, unlock the mutex and send a 429 Too Many Requests
+		// response, just like before.
+		if !clients[ip].Allow() {
+			mu.Unlock()
 			app.rateLimitExceededResponse(writer, request)
 			return
 		}
+
+		// Very importantly, unlock the mutex before calling the next handler in the
+		// chain.
+		mu.Unlock()
 
 		// Call next.
 		next.ServeHTTP(writer, request)
