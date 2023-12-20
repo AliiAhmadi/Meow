@@ -42,7 +42,9 @@ var (
 
 	// Define a query for get multiple movie based on query parameters and sort.
 	GET_ALL_QUERY = `SELECT id, created_at, title, year, runtime, genres, version
-	FROM movies ORDER BY id
+	FROM movies WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '') AND 
+	(genres @> $2 OR $2 = '{}')
+	ORDER BY id
 	`
 )
 
@@ -194,7 +196,7 @@ func (movieModel MovieModel) GetAll(title string, genres []string, filters Filte
 
 	// Using QueryContext() for execut query.
 	// Result is sql.Rows.
-	rows, err := movieModel.DB.QueryContext(ctx, GET_ALL_QUERY)
+	rows, err := movieModel.DB.QueryContext(ctx, GET_ALL_QUERY, title, pq.Array(genres))
 	if err != nil {
 		return nil, err
 	}

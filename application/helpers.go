@@ -183,6 +183,11 @@ func (app *Application) readInt(qs url.Values, key string, defaultValue int, v *
 	// Extract the value from the query string.
 	s := qs.Get(key)
 
+	// If no key exists return default value.
+	if s == "" {
+		return defaultValue
+	}
+
 	// Try convert the value to an int. If this fails add an
 	// error message to validator.
 	i, err := strconv.Atoi(s)
