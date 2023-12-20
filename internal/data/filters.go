@@ -31,3 +31,14 @@ func (f Filters) sortDirection() string {
 
 	return "ASC"
 }
+
+// Get limit for put in sql query
+func (f Filters) limit() int {
+	return f.PageSize
+}
+
+// Get start point of movies base on query parameters that provided
+// by user
+func (f Filters) offset() int {
+	return (f.Page - 1) * f.limit()
+}
