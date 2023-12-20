@@ -42,7 +42,7 @@ var (
 	DELETE_QUERY = `DELETE FROM movies WHERE id = $1`
 
 	// Define a query for get multiple movie based on query parameters and sort.
-	GET_ALL_QUERY = `SELECT id, created_at, title, year, runtime, genres, version
+	GET_ALL_QUERY = `SELECT count(*) OVER(), id, created_at, title, year, runtime, genres, version
 	FROM movies WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '') AND 
 	(genres @> $2 OR $2 = '{}')
 	ORDER BY %s %s, id ASC
@@ -191,7 +191,7 @@ func (movieModel MovieModel) Delete(id int64) error {
 }
 
 // Define GetAll() nethod on MovieModel for get all movies based on query parameters.
-func (movieModel MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+func (movieModel MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, Metadata, error) {
 	// Create formatted query by placing order by parameters.
 	query := fmt.Sprintf(GET_ALL_QUERY, filters.sortColumn(), filters.sortDirection())
 
@@ -209,10 +209,12 @@ func (movieModel MovieModel) GetAll(title string, genres []string, filters Filte
 	// Result is sql.Rows.
 	rows, err := movieModel.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
-
 	defer rows.Close()
+
+	// Declare a totalRecords variable.
+	totlaRecords := 0
 
 	// Initialize an empty slice to hold the movie data.
 	movies := []*Movie{}
@@ -224,6 +226,7 @@ func (movieModel MovieModel) GetAll(title string, genres []string, filters Filte
 
 		// Scan values from rows to movie instance.
 		err := rows.Scan(
+			&totlaRecords,
 			&movie.ID,
 			&movie.CreatedAt,
 			&movie.Title,
@@ -234,7 +237,7 @@ func (movieModel MovieModel) GetAll(title string, genres []string, filters Filte
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		// Add new movie to movies slice.
@@ -244,9 +247,12 @@ func (movieModel MovieModel) GetAll(title string, genres []string, filters Filte
 	// When the rows.Next() loop has finished, call rows.Err() to retrieve any error
 	// that was encountered during the iteration.
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
+	// Create metatdata for pagination.
+	metadata := calculateMetadata(totlaRecords, filters.Page, filters.PageSize)
+
 	// Ok.
-	return movies, nil
+	return movies, metadata, nil
 }

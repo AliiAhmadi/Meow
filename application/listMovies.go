@@ -62,13 +62,14 @@ func (app *Application) listMoviesHandler(writer http.ResponseWriter, request *h
 	}
 
 	// Get Movies based on query parameters by calling GetAll() method.
-	movies, err := app.Models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	movies, metadata, err := app.Models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(writer, request, err)
 		return
 	}
 
-	err = app.writeJSON(writer, http.StatusOK, envelope{"movies": movies}, nil)
+	// Write JSON response to Body of response.
+	err = app.writeJSON(writer, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(writer, request, err)
 		return

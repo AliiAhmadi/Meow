@@ -21,6 +21,6 @@ func (mock MockMovieModel) Delete(id int64) error {
 	return nil
 }
 
-func (mock MockMovieModel) GetAll(title string, genres []string, f Filters) ([]*Movie, error) {
-	return nil, nil
+func (mock MockMovieModel) GetAll(title string, genres []string, f Filters) ([]*Movie, Metadata, error) {
+	return nil, Metadata{}, nil
 }
