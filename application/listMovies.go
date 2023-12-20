@@ -1,6 +1,7 @@
 package application
 
 import (
+	"Meow/internal/data"
 	"Meow/internal/validator"
 	"net/http"
 )
@@ -10,11 +11,9 @@ func (app *Application) listMoviesHandler(writer http.ResponseWriter, request *h
 	// To keep things consistent with our other handlers, we'll define an input struct
 	// to hold the expected values from the request query string.
 	var input struct {
-		Title    string
-		Genres   []string
-		Page     int
-		PageSize int
-		Sort     string
+		Title  string
+		Genres []string
+		data.Filters
 	}
 
 	// Initialize a new validator instance.
@@ -32,12 +31,28 @@ func (app *Application) listMoviesHandler(writer http.ResponseWriter, request *h
 	// Get the page and page_size query string values as integers. Notice that we set
 	// the default page value to 1 and default page_size to 20, and that we pass the
 	// validator instance as the final argument here.
-	input.Page = app.readInt(qs, "page", 1, v)
-	input.PageSize = app.readInt(qs, "page_size", 10, v)
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 10, v)
 
 	// Extract the sort query string value, falling back to "id" if it is not provided
 	// by the client (which will imply a ascending sort on movie ID).
-	input.Sort = app.readString(qs, "sort", "id")
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
+	// Add safe sorts to safeSort slice for validation in follow.
+	input.Filters.SortSafeList = []string{
+		"id",
+		"-id",
+		"title",
+		"-title",
+		"year",
+		"-year",
+		"runtime",
+		"-runtime",
+	}
+
+	// Validating filters and if any error exists
+	// write that in v.
+	validator.ValidateFilters(v, input.Filters)
 
 	// Check for validation errors. if any error
 	// exist send failedValidationResponse() response.
