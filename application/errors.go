@@ -70,3 +70,9 @@ func (app *Application) failedValidationResponse(writer http.ResponseWriter, req
 func (app *Application) editConflictResponse(writer http.ResponseWriter, request *http.Request) {
 	app.errorResponse(writer, request, http.StatusConflict, "unable to update the record, please try again")
 }
+
+// When rate limit exceeded we will send a
+// response error with 429 to many request for user.
+func (app *Application) rateLimitExceededResponse(writer http.ResponseWriter, request *http.Request) {
+	app.errorResponse(writer, request, http.StatusTooManyRequests, "rate limit exceeded")
+}

@@ -31,5 +31,6 @@ func (app *Application) Routes() http.Handler {
 
 	// Return the http.Handler instance.
 	// Wrapped with recoverPanic() middleware.
-	return app.recoverPanic(router)
+	// Also wrap that with rateLimit() middleware. (v2)
+	return app.recoverPanic(app.rateLimit(router))
 }
