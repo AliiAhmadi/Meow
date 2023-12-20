@@ -39,6 +39,11 @@ var (
 
 	// Delete sql query for delete a record.
 	DELETE_QUERY = `DELETE FROM movies WHERE id = $1`
+
+	// Define a query for get multiple movie based on query parameters and sort.
+	GET_ALL_QUERY = `SELECT id, created_at, title, year, runtime, genres, version
+	FROM movies ORDER BY id
+	`
 )
 
 // Define a MovieModel struct type which wraps a sql.DB connection pool.
@@ -179,4 +184,56 @@ func (movieModel MovieModel) Delete(id int64) error {
 
 	// Ok.
 	return nil
+}
+
+// Define GetAll() nethod on MovieModel for get all movies based on query parameters.
+func (movieModel MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+	// Create a context with 3-second timeout.
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// Using QueryContext() for execut query.
+	// Result is sql.Rows.
+	rows, err := movieModel.DB.QueryContext(ctx, GET_ALL_QUERY)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	// Initialize an empty slice to hold the movie data.
+	movies := []*Movie{}
+
+	// Using rows.Next() to iterate through the rows in the result of query
+	for rows.Next() {
+		// Initialize an empty movie to cunstruct a new movie
+		var movie Movie
+
+		// Scan values from rows to movie instance.
+		err := rows.Scan(
+			&movie.ID,
+			&movie.CreatedAt,
+			&movie.Title,
+			&movie.Year,
+			&movie.Runtime,
+			pq.Array(&movie.Genres),
+			&movie.Version,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Add new movie to movies slice.
+		movies = append(movies, &movie)
+	}
+
+	// When the rows.Next() loop has finished, call rows.Err() to retrieve any error
+	// that was encountered during the iteration.
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Ok.
+	return movies, nil
 }
