@@ -4,8 +4,8 @@ import (
 	"Meow/application"
 	"Meow/config"
 	"Meow/internal/data"
+	jlog "Meow/log"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -38,20 +38,20 @@ func main() {
 
 	// Initialize a new logger which writes messages to the standard out stream,
 	// prefixed with the current date and time.
-	logger := log.New(os.Stdout, "Log: ", log.Ldate|log.Ltime)
+	logger := jlog.New(os.Stdout, jlog.LevelInfo)
 
 	// Get connection pool from OpenDB() function.
 	// If any error exists, we should exit application immediately.
 	db, err := config.OpenDB(cfg)
 	if err != nil {
-		logger.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 	// defering closing database pool.
 	defer db.Close()
 
 	// Also log a message to say that the connection pool has been successfully
 	// established.
-	logger.Printf("database connection pool established")
+	logger.PrintInfo("database connection pool established", nil)
 
 	// Declare an instance of the application struct, containing the config struct and
 	// the logger.
@@ -74,7 +74,10 @@ func main() {
 	}
 
 	// Start the http server.
-	logger.Printf("starting %s server on %s", cfg.Env, srv.Addr)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.Env,
+	})
 	err = srv.ListenAndServe()
-	logger.Fatal(err)
+	logger.PrintFatal(err, nil)
 }

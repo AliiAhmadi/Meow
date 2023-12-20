@@ -3,12 +3,12 @@ package application
 import (
 	"Meow/config"
 	"Meow/internal/data"
-	"log"
+	jlog "Meow/log"
 )
 
 type Application struct {
 	Config  *config.Config
-	Logger  *log.Logger
+	Logger  *jlog.Logger
 	Version string
 	Models  data.Models
 }
