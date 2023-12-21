@@ -7,22 +7,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Define a User struct to represent an individual user.
-type User struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  password  `json:"-"`
-	Activated bool      `json:"activated"`
-	Version   int       `json:"-"`
-}
-
 // Create a custom password type which is a struct containing the plaintext and hashed
 // versions of the password for a user.
 type password struct {
 	plaintext *string
-	hash      []byte
+	Hash      []byte
 }
 
 // The Set() method calculates the bcrypt hash of a plaintext password, and stores both
@@ -34,7 +23,7 @@ func (p *password) Set(plaintextPassword string) error {
 	}
 
 	p.plaintext = &plaintextPassword
-	p.hash = hash
+	p.Hash = hash
 	return nil
 }
 
@@ -42,7 +31,7 @@ func (p *password) Set(plaintextPassword string) error {
 // hashed password stored in the struct, returning true if it matches and false
 // otherwise.
 func (p *password) Matches(plaintextPassword string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword(p.hash, []byte(plaintextPassword))
+	err := bcrypt.CompareHashAndPassword(p.Hash, []byte(plaintextPassword))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
@@ -53,4 +42,15 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// Define a User struct to represent an individual user.
+type User struct {
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
+	Version   int       `json:"-"`
 }

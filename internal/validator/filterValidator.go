@@ -1,8 +1,6 @@
 package validator
 
-import (
-	"Meow/internal/data"
-)
+import "Meow/internal/data"
 
 // The ValidateFilters() function
 // validate page - pageSize - sort query parameters.
