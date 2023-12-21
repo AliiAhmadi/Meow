@@ -4,6 +4,7 @@
 package data
 
 type MockMovieModel struct{}
+type MockUserModel struct{}
 
 func (mock MockMovieModel) Insert(movie *Movie) error {
 	return nil
@@ -23,4 +24,17 @@ func (mock MockMovieModel) Delete(id int64) error {
 
 func (mock MockMovieModel) GetAll(title string, genres []string, f Filters) ([]*Movie, Metadata, error) {
 	return nil, Metadata{}, nil
+}
+
+// for userModel
+func (mock MockUserModel) Insert(*User) error {
+	return nil
+}
+
+func (mock MockUserModel) GetByEmail(string) (*User, error) {
+	return nil, nil
+}
+
+func (mock MockUserModel) Update(*User) error {
+	return nil
 }

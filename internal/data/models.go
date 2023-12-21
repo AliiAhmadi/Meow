@@ -22,12 +22,21 @@ type Models struct {
 		Delete(int64) error
 		GetAll(string, []string, Filters) ([]*Movie, Metadata, error)
 	}
+
+	Users interface {
+		Insert(*User) error
+		GetByEmail(string) (*User, error)
+		Update(*User) error
+	}
 }
 
 // Add a New() method which returns a Models struct
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Movies: MovieModel{
+			DB: db,
+		},
+		Users: UserModel{
 			DB: db,
 		},
 	}
@@ -38,5 +47,6 @@ func NewModels(db *sql.DB) Models {
 func NewMockModels() Models {
 	return Models{
 		Movies: MockMovieModel{},
+		Users:  MockUserModel{},
 	}
 }
