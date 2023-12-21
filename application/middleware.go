@@ -78,39 +78,42 @@ func (app *Application) rateLimit(next http.Handler) http.Handler {
 	// The function we are returning is a closure, which 'closes over' the limiter
 	// variable.
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		// Extract the client's IP address from the request.
-		ip, _, err := net.SplitHostPort(request.RemoteAddr)
-		if err != nil {
-			app.serverErrorResponse(writer, request, err)
-			return
-		}
-
-		// Lock the mutex to prevent this code from being executed concurrently.
-		mu.Lock()
-
-		// Check to see if the IP address already exists in the map. If it doesn't, then
-		// initialize a new rate limiter and add the IP address and limiter to the map.
-		if _, found := clients[ip]; !found {
-			clients[ip] = &client{
-				limiter: rate.NewLimiter(2, 4),
+		// Check is rate limiter enabled?
+		if app.Config.Limiter.Enabled {
+			// Extract the client's IP address from the request.
+			ip, _, err := net.SplitHostPort(request.RemoteAddr)
+			if err != nil {
+				app.serverErrorResponse(writer, request, err)
+				return
 			}
-		}
 
-		// Update last seen for current request.
-		clients[ip].lastSeen = time.Now()
+			// Lock the mutex to prevent this code from being executed concurrently.
+			mu.Lock()
 
-		// Call the Allow() method on the rate limiter for the current IP address. If
-		// the request isn't allowed, unlock the mutex and send a 429 Too Many Requests
-		// response, just like before.
-		if !clients[ip].limiter.Allow() {
+			// Check to see if the IP address already exists in the map. If it doesn't, then
+			// initialize a new rate limiter and add the IP address and limiter to the map.
+			if _, found := clients[ip]; !found {
+				clients[ip] = &client{
+					limiter: rate.NewLimiter(rate.Limit(app.Config.Limiter.Rps), app.Config.Limiter.Burst),
+				}
+			}
+
+			// Update last seen for current request.
+			clients[ip].lastSeen = time.Now()
+
+			// Call the Allow() method on the rate limiter for the current IP address. If
+			// the request isn't allowed, unlock the mutex and send a 429 Too Many Requests
+			// response, just like before.
+			if !clients[ip].limiter.Allow() {
+				mu.Unlock()
+				app.rateLimitExceededResponse(writer, request)
+				return
+			}
+
+			// Very importantly, unlock the mutex before calling the next handler in the
+			// chain.
 			mu.Unlock()
-			app.rateLimitExceededResponse(writer, request)
-			return
 		}
-
-		// Very importantly, unlock the mutex before calling the next handler in the
-		// chain.
-		mu.Unlock()
 
 		// Call next.
 		next.ServeHTTP(writer, request)
