@@ -16,6 +16,12 @@ type Config struct {
 		MaxIdleConns int
 		MaxIdleTime  string
 	}
+
+	Limiter struct {
+		Rps     float64
+		Burst   int
+		Enabled bool
+	}
 }
 
 func (cfg *Config) GetSport() string {
