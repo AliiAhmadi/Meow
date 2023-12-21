@@ -6,10 +6,7 @@ import (
 	"Meow/internal/data"
 	jlog "Meow/log"
 	"flag"
-	"log"
-	"net/http"
 	"os"
-	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -66,23 +63,9 @@ func main() {
 		Models:  data.NewModels(db),
 	}
 
-	// Declare a HTTP server with some sensible timeout settings, which listens on the
-	// port provided in the config struct and uses the servemux we created above as the
-	// handler. use the httprouter instance returned by app.routes() as the server handler.
-	srv := &http.Server{
-		Addr:         cfg.GetSport(),
-		Handler:      application.Routes(),
-		ErrorLog:     log.New(logger, "", 0),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+	// Start server with serve() method in app instance.
+	err = application.Serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
-
-	// Start the http server.
-	logger.PrintInfo("starting server", map[string]string{
-		"addr": srv.Addr,
-		"env":  cfg.Env,
-	})
-	err = srv.ListenAndServe()
-	logger.PrintFatal(err, nil)
 }
