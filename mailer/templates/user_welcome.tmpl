@@ -1,0 +1,21 @@
+{{define "subject"}}Welcome to Meow Service!{{end}}
+{{define "plainBody"}}
+Hi,
+Thanks for signing up. For future reference, your user ID number is {{.ID}}.
+Thanks
+{{end}}
+{{define "htmlBody"}}
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p>Hi,</p>
+<p>Thanks for signing up.</p>
+<p>For future reference, your user ID number is {{.ID}}.</p>
+<p>Thanks</p>
+</body>
+</html>
+{{end}}

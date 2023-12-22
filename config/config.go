@@ -22,6 +22,14 @@ type Config struct {
 		Burst   int
 		Enabled bool
 	}
+
+	Smtp struct {
+		Host     string
+		Port     int
+		Username string
+		Password string
+		Sender   string
+	}
 }
 
 func (cfg *Config) GetSport() string {

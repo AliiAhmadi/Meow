@@ -5,6 +5,7 @@ import (
 	"Meow/config"
 	"Meow/internal/data"
 	jlog "Meow/log"
+	"Meow/mailer"
 	"flag"
 	"os"
 
@@ -35,6 +36,12 @@ func main() {
 	flag.Float64Var(&cfg.Limiter.Rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.Limiter.Burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.Limiter.Enabled, "limiter-enabled", true, "Rate limiter enable-disable")
+
+	flag.StringVar(&cfg.Smtp.Host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.Smtp.Port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&cfg.Smtp.Username, "smtp-username", "-", "SMTP username")
+	flag.StringVar(&cfg.Smtp.Password, "smtp-password", "-", "SMTP password")
+	flag.StringVar(&cfg.Smtp.Sender, "smtp-sender", "Meow <no-reply@meow.com>", "SMTP sender")
 	flag.Parse()
 
 	// Initialize a new logger which writes messages to the standard out stream,
@@ -61,6 +68,13 @@ func main() {
 		Logger:  logger,
 		Version: version,
 		Models:  data.NewModels(db),
+		Mailer: mailer.New(
+			cfg.Smtp.Host,
+			cfg.Smtp.Port,
+			cfg.Smtp.Username,
+			cfg.Smtp.Password,
+			cfg.Smtp.Sender,
+		),
 	}
 
 	// Start server with serve() method in app instance.

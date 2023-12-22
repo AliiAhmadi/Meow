@@ -25,6 +25,7 @@ func ValidateUser(v *Validator, user *data.User) {
 	// If the plaintext password is not nil, call the standalone
 	// ValidatePasswordPlaintext() helper.
 	ValidateEmail(v, user.Email)
+	ValidatePasswordPlainText(v, *user.Password.Plaintext)
 
 	// If the password hash is ever nil, this will be due to a logic error in our
 	// codebase (probably because we forgot to set a password for the user).

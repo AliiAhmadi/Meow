@@ -130,7 +130,7 @@ func (userModel UserModel) Update(user *User) error {
 // Create a custom password type which is a struct containing the plaintext and hashed
 // versions of the password for a user.
 type password struct {
-	plaintext *string
+	Plaintext *string
 	Hash      []byte
 }
 
@@ -142,7 +142,7 @@ func (p *password) Set(plaintextPassword string) error {
 		return err
 	}
 
-	p.plaintext = &plaintextPassword
+	p.Plaintext = &plaintextPassword
 	p.Hash = hash
 	return nil
 }

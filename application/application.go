@@ -4,6 +4,7 @@ import (
 	"Meow/config"
 	"Meow/internal/data"
 	jlog "Meow/log"
+	"Meow/mailer"
 )
 
 type Application struct {
@@ -11,4 +12,5 @@ type Application struct {
 	Logger  *jlog.Logger
 	Version string
 	Models  data.Models
+	Mailer  mailer.Mailer
 }
