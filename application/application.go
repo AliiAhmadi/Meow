@@ -5,6 +5,7 @@ import (
 	"Meow/internal/data"
 	jlog "Meow/log"
 	"Meow/mailer"
+	"sync"
 )
 
 type Application struct {
@@ -13,4 +14,5 @@ type Application struct {
 	Version string
 	Models  data.Models
 	Mailer  mailer.Mailer
+	Wg      sync.WaitGroup
 }

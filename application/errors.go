@@ -55,7 +55,7 @@ func (app *Application) methodNotAllowedResponse(writer http.ResponseWriter, req
 
 // The badRequestResponse() method will be used when need to send
 // error response when invalid request recived.
-func (app Application) badRequestResponse(writer http.ResponseWriter, request *http.Request, err error) {
+func (app *Application) badRequestResponse(writer http.ResponseWriter, request *http.Request, err error) {
 	app.errorResponse(writer, request, http.StatusBadRequest, err.Error())
 }
 
