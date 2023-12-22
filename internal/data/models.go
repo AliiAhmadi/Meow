@@ -28,6 +28,11 @@ type Models struct {
 		GetByEmail(string) (*User, error)
 		Update(*User) error
 	}
+
+	Tokens interface {
+		DeleteAllForUser(scope string, userID int64) error
+		Insert(token *Token) error
+	}
 }
 
 // Add a New() method which returns a Models struct
@@ -39,6 +44,10 @@ func NewModels(db *sql.DB) Models {
 		Users: UserModel{
 			DB: db,
 		},
+
+		Tokens: TokenModel{
+			DB: db,
+		},
 	}
 }
 
@@ -48,5 +57,6 @@ func NewMockModels() Models {
 	return Models{
 		Movies: MockMovieModel{},
 		Users:  MockUserModel{},
+		Tokens: MockTokenModel{},
 	}
 }

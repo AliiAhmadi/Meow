@@ -5,6 +5,7 @@ package data
 
 type MockMovieModel struct{}
 type MockUserModel struct{}
+type MockTokenModel struct{}
 
 func (mock MockMovieModel) Insert(movie *Movie) error {
 	return nil
@@ -36,5 +37,14 @@ func (mock MockUserModel) GetByEmail(string) (*User, error) {
 }
 
 func (mock MockUserModel) Update(*User) error {
+	return nil
+}
+
+// For tokenModel
+func (mock MockTokenModel) DeleteAllForUser(scope string, userID int64) error {
+	return nil
+}
+
+func (mock MockTokenModel) Insert(token *Token) error {
 	return nil
 }

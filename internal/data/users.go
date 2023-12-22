@@ -14,6 +14,17 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+// Define a User struct to represent an individual user.
+type User struct {
+	ID        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  password  `json:"-"`
+	Activated bool      `json:"activated"`
+	Version   int       `json:"-"`
+}
+
 // Define Queries
 var (
 	INSERT_USER_QUERY = `INSERT INTO users (name, email, password_hash, activated) 
@@ -162,15 +173,4 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// Define a User struct to represent an individual user.
-type User struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  password  `json:"-"`
-	Activated bool      `json:"activated"`
-	Version   int       `json:"-"`
 }
