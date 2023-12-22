@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"text/template"
+	"time"
 
 	"github.com/go-gomail/gomail"
 )
@@ -67,10 +68,15 @@ func (mailer Mailer) Send(recipient string, templateFile string, data interface{
 	// Call the DialAndSend() method on the dialer, passing in the message to send. This
 	// opens a connection to the SMTP server, sends the message, then closes the
 	// connection.
-	err = mailer.dialer.DialAndSend(message)
-	if err != nil {
-		return err
+	for i := 0; i < 4; i++ {
+		err = mailer.dialer.DialAndSend(message)
+		if err == nil {
+			return nil
+		}
+
+		// Wait 500 millisecond
+		time.Sleep(500 * time.Millisecond)
 	}
 
-	return nil
+	return err
 }
