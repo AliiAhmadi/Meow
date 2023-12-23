@@ -76,3 +76,8 @@ func (app *Application) editConflictResponse(writer http.ResponseWriter, request
 func (app *Application) rateLimitExceededResponse(writer http.ResponseWriter, request *http.Request) {
 	app.errorResponse(writer, request, http.StatusTooManyRequests, "rate limit exceeded")
 }
+
+// Invalid credentials error when user credentials incorrect or user email not found
+func (app *Application) invalidCredentialsResponse(writer http.ResponseWriter, request *http.Request) {
+	app.errorResponse(writer, request, http.StatusUnauthorized, "invalid authntication credentials")
+}
