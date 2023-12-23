@@ -8,6 +8,7 @@ import "time"
 type MockMovieModel struct{}
 type MockUserModel struct{}
 type MockTokenModel struct{}
+type MockPermissionModel struct{}
 
 func (mock MockMovieModel) Insert(movie *Movie) error {
 	return nil
@@ -56,5 +57,10 @@ func (mock MockTokenModel) Insert(token *Token) error {
 }
 
 func (mock MockTokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {
+	return nil, nil
+}
+
+// For PermissionModel
+func (mock MockPermissionModel) GetAllForUser(userID int64) (Permissions, error) {
 	return nil, nil
 }

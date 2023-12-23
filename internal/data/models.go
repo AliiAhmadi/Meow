@@ -36,6 +36,10 @@ type Models struct {
 		Insert(token *Token) error
 		New(int64, time.Duration, string) (*Token, error)
 	}
+
+	Permissions interface {
+		GetAllForUser(int64) (Permissions, error)
+	}
 }
 
 // Add a New() method which returns a Models struct
@@ -51,6 +55,10 @@ func NewModels(db *sql.DB) Models {
 		Tokens: TokenModel{
 			DB: db,
 		},
+
+		Permissions: PermissionModel{
+			DB: db,
+		},
 	}
 }
 
@@ -58,8 +66,9 @@ func NewModels(db *sql.DB) Models {
 // only.
 func NewMockModels() Models {
 	return Models{
-		Movies: MockMovieModel{},
-		Users:  MockUserModel{},
-		Tokens: MockTokenModel{},
+		Movies:      MockMovieModel{},
+		Users:       MockUserModel{},
+		Tokens:      MockTokenModel{},
+		Permissions: MockPermissionModel{},
 	}
 }
