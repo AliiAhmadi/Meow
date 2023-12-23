@@ -44,11 +44,6 @@ func (app *Application) createAuthenticationTokenHandler(writer http.ResponseWri
 		return
 	}
 
-	if !user.Activated {
-		app.invalidCredentialsResponse(writer, request)
-		return
-	}
-
 	match, err := user.Password.Matches(input.Password)
 	if err != nil {
 		app.serverErrorResponse(writer, request, err)
