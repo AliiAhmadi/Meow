@@ -42,6 +42,10 @@ func (mock MockUserModel) Update(*User) error {
 	return nil
 }
 
+func (mock MockUserModel) GetForToken(scope string, plainToken string) (*User, error) {
+	return nil, nil
+}
+
 // For tokenModel
 func (mock MockTokenModel) DeleteAllForUser(scope string, userID int64) error {
 	return nil

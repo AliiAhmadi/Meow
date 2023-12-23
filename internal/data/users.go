@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -40,6 +41,15 @@ var (
 	name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
 	WHERE id = $5 AND version = $6
 	RETURNING version
+	`
+
+	GET_FOR_TOKEN_QUERY = `SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+	FROM users
+	INNER JOIN tokens
+	ON users.id = tokens.user_id
+	WHERE tokens.hash = $1
+	AND tokens.scope = $2
+	AND tokens.expiry > $3
 	`
 )
 
@@ -173,4 +183,44 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// Get a user related for a token.
+func (userModel UserModel) GetForToken(scope string, plainToken string) (*User, error) {
+	// Calculate the SHA-256 hash of the plaintext
+	tokenHash := sha256.Sum256([]byte(plainToken))
+
+	args := []interface{}{
+		tokenHash[:],
+		scope,
+		time.Now(),
+	}
+
+	// Create a user variable for storing data from data base on that.
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := userModel.DB.QueryRowContext(ctx, GET_FOR_TOKEN_QUERY, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.Hash,
+		&user.Activated,
+		&user.Version,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	// Returning user.
+	return &user, nil
 }
