@@ -3,6 +3,8 @@
 
 package data
 
+import "time"
+
 type MockMovieModel struct{}
 type MockUserModel struct{}
 type MockTokenModel struct{}
@@ -47,4 +49,8 @@ func (mock MockTokenModel) DeleteAllForUser(scope string, userID int64) error {
 
 func (mock MockTokenModel) Insert(token *Token) error {
 	return nil
+}
+
+func (mock MockTokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {
+	return nil, nil
 }

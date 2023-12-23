@@ -5,6 +5,7 @@ import (
 	"Meow/internal/validator"
 	"errors"
 	"net/http"
+	"time"
 )
 
 func (app *Application) registerUserHandler(writer http.ResponseWriter, request *http.Request) {
@@ -59,9 +60,22 @@ func (app *Application) registerUserHandler(writer http.ResponseWriter, request 
 		return
 	}
 
+	// Generate a token for acvivation.
+	token, err := app.Models.Tokens.New(user.ID, 1*time.Hour, data.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(writer, request, err)
+		return
+	}
+
 	// Run sending email and panic recover for that in background.
 	app.background(func() {
-		err := app.Mailer.Send(user.Email, "user_welcome.tmpl", user)
+
+		data := map[string]interface{}{
+			"userID":          user.ID,
+			"activationToken": token.Plaintext,
+		}
+
+		err := app.Mailer.Send(user.Email, "user_welcome.tmpl", data)
 		if err != nil {
 			app.Logger.PrintError(err, nil)
 		}
