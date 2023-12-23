@@ -96,3 +96,7 @@ func (app *Application) authenticationRequiredResponse(writer http.ResponseWrite
 func (app *Application) inActiveAccountResponse(writer http.ResponseWriter, request *http.Request) {
 	app.errorResponse(writer, request, http.StatusForbidden, "your user account must be activated to access this resource")
 }
+
+func (app *Application) notPermittedResponse(writer http.ResponseWriter, request *http.Request) {
+	app.errorResponse(writer, request, http.StatusForbidden, "your user account doesn't have the necessary permissions to access this resource")
+}

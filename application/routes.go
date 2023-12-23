@@ -6,6 +6,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+const (
+	READ_PERMISSION  = "movies:read"
+	WRITE_PERMISSION = "movies:write"
+)
+
 func (app *Application) Routes() http.Handler {
 	// Initialize a new httprouter router instance.
 	router := httprouter.New()
@@ -22,12 +27,12 @@ func (app *Application) Routes() http.Handler {
 	// http.MethodPost are constants which equate to the strings "GET" and "POST"
 	// respectively.
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/movies", app.requireActivatedUser(app.createNewMovieHandler))
-	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.requireActivatedUser(app.showMovieHandler))
-	router.HandlerFunc(http.MethodPut, "/v1/movies/:id", app.requireActivatedUser(app.updateMovieHandler))
-	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.requireActivatedUser(app.updateMovieHandler))
-	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requireActivatedUser(app.deleteMovieHandler))
-	router.HandlerFunc(http.MethodGet, "/v1/movies", app.requireActivatedUser(app.listMoviesHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/movies", app.requirePermission(WRITE_PERMISSION, app.createNewMovieHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.requirePermission(READ_PERMISSION, app.showMovieHandler))
+	router.HandlerFunc(http.MethodPut, "/v1/movies/:id", app.requirePermission(WRITE_PERMISSION, app.updateMovieHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.requirePermission(WRITE_PERMISSION, app.updateMovieHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission(WRITE_PERMISSION, app.deleteMovieHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/movies", app.requirePermission(READ_PERMISSION, app.listMoviesHandler))
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
