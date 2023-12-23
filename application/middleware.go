@@ -1,9 +1,13 @@
 package application
 
 import (
+	"Meow/internal/data"
+	"Meow/internal/validator"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -116,6 +120,64 @@ func (app *Application) rateLimit(next http.Handler) http.Handler {
 		}
 
 		// Call next.
+		next.ServeHTTP(writer, request)
+	})
+}
+
+// authenticate middleware
+func (app *Application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		// Add the "Vary: Authorization" header to the response. This indicates to any
+		// caches that the response may vary based on the value of the Authorization
+		// header in the request.
+		writer.Header().Add("Vary", "Authorization")
+
+		// Retrieve the value of the Authorization header from the request. This will
+		// return the empty string "" if there is no such header found.
+		authorizationHeader := request.Header.Get("authorization")
+
+		// If there is no Authorization header found, use the contextSetUser() helper
+		// that we just made to add the AnonymousUser to the request context. Then we
+		// call the next handler in the chain and return without executing any of the
+		// code below.
+		if authorizationHeader == "" {
+			request = app.contextSetUser(request, data.AnonymousUser)
+			next.ServeHTTP(writer, request)
+			return
+		}
+
+		// Otherwise, we expect the value of the Authorization header to be in the format
+		// "Bearer <token>". We try to split this into its constituent parts, and if the
+		// header isn't in the expected format we return a 401 Unauthorized response
+		// using the invalidAuthenticationTokenResponse() helper
+		headerParts := strings.Split(authorizationHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			app.invalidAuthenticationTokenResponse(writer, request)
+			return
+		}
+
+		token := headerParts[1]
+
+		v := validator.New()
+
+		if validator.ValidateTokenPlaintext(v, token); !v.Valid() {
+			app.invalidAuthenticationTokenResponse(writer, request)
+			return
+		}
+
+		user, err := app.Models.Users.GetForToken(data.ScopeAuthentication, token)
+		if err != nil {
+			switch {
+			case errors.Is(err, data.ErrRecordNotFound):
+				app.invalidAuthenticationTokenResponse(writer, request)
+			default:
+				app.serverErrorResponse(writer, request, err)
+			}
+
+			return
+		}
+
+		request = app.contextSetUser(request, user)
 		next.ServeHTTP(writer, request)
 	})
 }
