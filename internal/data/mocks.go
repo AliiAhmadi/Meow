@@ -64,3 +64,7 @@ func (mock MockTokenModel) New(userID int64, ttl time.Duration, scope string) (*
 func (mock MockPermissionModel) GetAllForUser(userID int64) (Permissions, error) {
 	return nil, nil
 }
+
+func (mock MockPermissionModel) AddForUsers(userID int64, codes ...string) error {
+	return nil
+}

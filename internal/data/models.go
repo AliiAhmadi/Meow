@@ -39,6 +39,7 @@ type Models struct {
 
 	Permissions interface {
 		GetAllForUser(int64) (Permissions, error)
+		AddForUsers(int64, ...string) error
 	}
 }
 

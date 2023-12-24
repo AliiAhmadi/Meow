@@ -60,6 +60,12 @@ func (app *Application) registerUserHandler(writer http.ResponseWriter, request 
 		return
 	}
 
+	err = app.Models.Permissions.AddForUsers(user.ID, READ_PERMISSION)
+	if err != nil {
+		app.serverErrorResponse(writer, request, err)
+		return
+	}
+
 	// Generate a token for acvivation.
 	token, err := app.Models.Tokens.New(user.ID, 1*time.Hour, data.ScopeActivation)
 	if err != nil {
