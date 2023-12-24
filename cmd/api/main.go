@@ -6,9 +6,13 @@ import (
 	"Meow/internal/data"
 	jlog "Meow/log"
 	"Meow/mailer"
+	"database/sql"
+	"expvar"
 	"flag"
 	"os"
+	"runtime"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -17,9 +21,26 @@ import (
 // Version number hard-coded constant.
 const version = "1.0.0"
 
+func expvarValues(db *sql.DB) {
+	expvar.NewString("version").Set(version)
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
+}
+
 func main() {
 	// Declare an instance of config struct.
 	cfg := new(config.Config)
+
+	// expvar customization
 
 	// Read the value of the port and env command-line flags into the config struct. We
 	// default to using the port number 4000 and the environment "development" if no
@@ -67,6 +88,7 @@ func main() {
 	// established.
 	logger.PrintInfo("database connection pool established", nil)
 
+	expvarValues(db)
 	// Declare an instance of the application struct, containing the config struct and
 	// the logger.
 	application := &application.Application{

@@ -4,6 +4,7 @@ import (
 	"Meow/internal/data"
 	"Meow/internal/validator"
 	"errors"
+	"expvar"
 	"fmt"
 	"net"
 	"net/http"
@@ -249,5 +250,21 @@ func (app *Application) enableCORS(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(writer, request)
+	})
+}
+
+func (app *Application) metrics(next http.Handler) http.Handler {
+	totalRequestsReceived := expvar.NewInt("total_requests_received")
+	totalResponsesSend := expvar.NewInt("total_responses_send")
+	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_microseconds")
+	inflightRequests := expvar.NewInt("inflight_requests")
+
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		start := time.Now()
+		totalRequestsReceived.Add(1)
+		next.ServeHTTP(writer, request)
+		totalResponsesSend.Add(1)
+		totalProcessingTimeMicroseconds.Add(time.Since(start).Microseconds())
+		inflightRequests.Set(totalRequestsReceived.Value() - totalResponsesSend.Value())
 	})
 }
