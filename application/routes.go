@@ -40,5 +40,5 @@ func (app *Application) Routes() http.Handler {
 	// Return the http.Handler instance.
 	// Wrapped with recoverPanic() middleware.
 	// Also wrap that with rateLimit() middleware. (v2)
-	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
+	return app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router))))
 }

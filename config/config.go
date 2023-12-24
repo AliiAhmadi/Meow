@@ -30,6 +30,10 @@ type Config struct {
 		Password string
 		Sender   string
 	}
+
+	Cors struct {
+		TrustedOrigins []string
+	}
 }
 
 func (cfg *Config) GetSport() string {

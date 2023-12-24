@@ -220,3 +220,22 @@ func (app *Application) requirePermission(code string, next http.HandlerFunc) ht
 
 	return app.requireActivatedUser(fun)
 }
+
+func (app *Application) enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Vary", "Origin")
+
+		origin := request.Header.Get("Origin")
+
+		if origin != "" {
+			for i := range app.Config.Cors.TrustedOrigins {
+				if origin == app.Config.Cors.TrustedOrigins[i] {
+					writer.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+		}
+
+		next.ServeHTTP(writer, request)
+	})
+}

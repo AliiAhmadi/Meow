@@ -8,6 +8,7 @@ import (
 	"Meow/mailer"
 	"flag"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -42,6 +43,11 @@ func main() {
 	flag.StringVar(&cfg.Smtp.Username, "smtp-username", "-", "SMTP username")
 	flag.StringVar(&cfg.Smtp.Password, "smtp-password", "-", "SMTP password")
 	flag.StringVar(&cfg.Smtp.Sender, "smtp-sender", "Meow <no-reply@meow.com>", "SMTP sender")
+
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(value string) error {
+		cfg.Cors.TrustedOrigins = strings.Fields(value)
+		return nil
+	})
 	flag.Parse()
 
 	// Initialize a new logger which writes messages to the standard out stream,
