@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -19,7 +20,11 @@ import (
 
 // Declare a string containing the application version number.
 // Version number hard-coded constant.
-const version = "1.0.0"
+
+var (
+	buildTime string
+	version   = "1.0.0"
+)
 
 func expvarValues(db *sql.DB) {
 	expvar.NewString("version").Set(version)
@@ -69,7 +74,16 @@ func main() {
 		cfg.Cors.TrustedOrigins = strings.Fields(value)
 		return nil
 	})
+
+	displayVersion := flag.Bool("version", false, "Dispaly version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		fmt.Printf("Build time:\t%s\n", buildTime)
+		os.Exit(0)
+	}
 
 	// Initialize a new logger which writes messages to the standard out stream,
 	// prefixed with the current date and time.
