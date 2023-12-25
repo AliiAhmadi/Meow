@@ -1,5 +1,7 @@
 # Ali Ahmadi 2023
 
+include .envrc
+
 ## help: print this help message
 .PHONY: help
 help:
@@ -13,7 +15,7 @@ confirm:
 ## run: run the cmd/api application
 .PHONY: run
 run:
-	@go run ./cmd/api
+	@go run ./cmd/api -dsn=${dsn}
 
 ## psql: connect to the database using psql
 .PHONY: psql
@@ -31,3 +33,19 @@ up: confirm
 migration:
 	@echo "creating migration files for ${name}..."
 	migrate create -seq -ext=.sql -dir=./migrations/ ${name}
+
+# ==================================================================================== #
+# QUALITY CONTROL
+# ==================================================================================== #
+
+## audit: tidy dependencies and format, vet and test all code
+audit:
+	@echo "Tidying and verifying module dependencies..."
+	go mod tidy
+	go mod verify
+	@echo "formatting code..."
+	go fmt ./...
+	@echo "vetting code..."
+	go vet ./...
+	@echo "running tests..."
+	go test -race -vet=off ./...
