@@ -39,6 +39,7 @@ migration:
 # ==================================================================================== #
 
 ## audit: tidy dependencies and format, vet and test all code
+.PHONY: audit
 audit:
 	@echo "Tidying and verifying module dependencies..."
 	go mod tidy
@@ -49,3 +50,12 @@ audit:
 	go vet ./...
 	@echo "running tests..."
 	go test -race -vet=off ./...
+
+## vendor: tidy and vendor dependencies
+.PHONY: vendor
+vendor:
+	@echo "tidying and verifying module dependencies..."
+	go mod tidy
+	go mod verify
+	@echo "vendoring dependencies..."
+	go mod vendor
