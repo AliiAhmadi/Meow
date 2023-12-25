@@ -41,9 +41,6 @@ migration:
 ## audit: tidy dependencies and format, vet and test all code
 .PHONY: audit
 audit:
-	@echo "Tidying and verifying module dependencies..."
-	go mod tidy
-	go mod verify
 	@echo "formatting code..."
 	go fmt ./...
 	@echo "vetting code..."
@@ -59,3 +56,15 @@ vendor:
 	go mod verify
 	@echo "vendoring dependencies..."
 	go mod vendor
+
+
+# Build targets
+
+## build: build the cmd/api application
+.PHONY: build
+build:
+	@echo "Building cmd/api..."
+	GOOS=windows GOARCH=amd64 go build -ldflags="-s" -o=./bin/windows_amd64/Meow ./cmd/api
+	GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o=./bin/linux_amd64/Meow ./cmd/api
+	GOOS=linux GOARCH=mips64 go build -ldflags="-s" -o=./bin/linux_mips64/Meow ./cmd/api
+	GOOS=linux GOARCH=arm64 go build -ldflags="-s" -o=./bin/linux_arm64/Meow ./cmd/api
