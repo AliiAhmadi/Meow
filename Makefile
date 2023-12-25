@@ -64,7 +64,7 @@ vendor:
 .PHONY: build
 build:
 	@echo "Building cmd/api..."
-	GOOS=windows GOARCH=amd64 go build -ldflags="-s" -o=./bin/windows_amd64/Meow ./cmd/api
-	GOOS=linux GOARCH=amd64 go build -ldflags="-s" -o=./bin/linux_amd64/Meow ./cmd/api
-	GOOS=linux GOARCH=mips64 go build -ldflags="-s" -o=./bin/linux_mips64/Meow ./cmd/api
-	GOOS=linux GOARCH=arm64 go build -ldflags="-s" -o=./bin/linux_arm64/Meow ./cmd/api
+	GOOS=windows GOARCH=amd64 go build -a -ldflags="-s" -o=./bin/windows_amd64/Meow ./cmd/api
+	GOOS=linux GOARCH=amd64 go build -a -ldflags="-s" -o=./bin/linux_amd64/Meow ./cmd/api
+	GOOS=linux GOARCH=mips64 go build -a -ldflags="-s" -o=./bin/linux_mips64/Meow ./cmd/api
+	GOOS=linux GOARCH=arm64 go build -a -ldflags="-s" -o=./bin/linux_arm64/Meow ./cmd/api
