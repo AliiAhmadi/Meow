@@ -9,7 +9,7 @@ Let's go through the general process starting from creating a new account and ve
 
 ## Registeration
 
-For registration we need to send a post request to `http://127.0.0.1:4000/v1/users` with `email`, `password` and `name` field.
+For registration we need to send a post request to `http://127.0.0.1:4000/v1/users` with `email`, `password` and `name` fields.
 
 ```zsh
 curl --location 'http://127.0.0.1:4000/v1/users' \
