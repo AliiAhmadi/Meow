@@ -33,3 +33,54 @@ Response will be like this if registration be sucessful.
     }
 }
 ```
+
+Now you will receive an verification email like this:
+```
+Hi,
+
+Thanks for signing up.
+
+For future reference, your user ID number is 17.
+
+Please send a request to the PUT /v1/users/activated endpoint with the following JSON body to activate your account:
+
+
+{"token": "TXF7POG4374WTUUS2Y7XQ5ETFU"}
+
+Please note that this is a one-time use token and it will expire in 1 hour.
+
+Thanks
+```
+
+Follow this and send a PUT request to `/v1/users/activated`:
+
+```zsh
+curl --location --request PUT 'http://127.0.0.1:4000/v1/users/activated' \
+--header 'Key: Value' \
+--header 'Content-Type: application/json' \
+--data '{
+    "token": "TXF7POG4374WTUUS2Y7XQ5ETFU"
+}'
+```
+
+Your account activated and now you need to generate a authorization token for access to endpoints:
+
+```zsh
+curl --location 'http://127.0.0.1:4000/v1/tokens/authentication' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "me@gmail.com",
+    "password": "123456789"
+}'
+```
+
+Response:
+
+```json
+{
+    "auth_token": {
+        "token": "TZQQKL3PYCIFROF7INLAYM5YPI",
+        "expiry": "2023-12-27T13:29:45.791141968+03:30"
+    }
+}
+```
