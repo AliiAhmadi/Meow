@@ -113,3 +113,24 @@ curl --location 'http://127.0.0.1:4000/v1/movies/1' \
     "error": "invalid or missing authentication token"
 }
 ```
+
+Some validation will be done when you want to register:
+
+```zsh
+curl --location 'http://127.0.0.1:4000/v1/users' \
+--header 'Content-Type: application/json' \
+--data '{
+    "email": "invalid_email",
+    "password": "123_"
+}'
+```
+
+```json
+{
+    "error": {
+        "email": "must be a valid email address",
+        "name": "must be provided",
+        "password": "must be at least 8 bytes long"
+    }
+}
+```
