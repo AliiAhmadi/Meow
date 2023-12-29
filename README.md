@@ -265,3 +265,41 @@ Need to insert an row in `users_permissions` table for current user to have acce
     }
 }
 ```
+
+```zsh
+curl --location --request PUT 'http://127.0.0.1:4000/v1/movies/5' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YCXX5FG6K2ISWOC4SZMRJKAPVA' \
+--data '{
+    "runtime": "130 mins"
+}'
+```
+
+```json
+{
+    "movie": {
+        "id": 5,
+        "title": "The Avengers 2",
+        "year": 2012,
+        "runtime": "130 mins",
+        "genres": [
+            "action",
+            "comedy",
+            "western"
+        ],
+        "version": 2
+    }
+}
+```
+
+```zsh
+curl --location --request DELETE 'http://127.0.0.1:4000/v1/movies/2' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YCXX5FG6K2ISWOC4SZMRJKAPVA'
+```
+
+```json
+{
+    "message": "movie deleted successfully"
+}
+```
