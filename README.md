@@ -134,3 +134,69 @@ curl --location 'http://127.0.0.1:4000/v1/users' \
     }
 }
 ```
+
+## Movie routes
+
+We have 5 routes for `fetch`, `update`, `insert` and `delete` movies in different ways. Let's deal with them.
+
+```zsh
+curl --location 'http://127.0.0.1:4000/v1/movies' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YCXX5FG6K2ISWOC4SZMRJKAPVA'
+```
+
+```json
+{
+    "metadata": {
+        "current_page": 1,
+        "page_size": 10,
+        "first_page": 1,
+        "last_page": 1,
+        "total_records": 4
+    },
+    "movies": [
+        {
+            "id": 1,
+            "title": "avengers",
+            "year": 2012,
+            "runtime": "2 mins",
+            "genres": [
+                "sci-fi"
+            ],
+            "version": 3
+        },
+        {
+            "id": 2,
+            "title": "Black Panther",
+            "year": 2018,
+            "runtime": "134 mins",
+            "genres": [
+                "action",
+                "adventure"
+            ],
+            "version": 1
+        },
+        {
+            "id": 3,
+            "title": "Deadpool",
+            "year": 2016,
+            "runtime": "108 mins",
+            "genres": [
+                "action",
+                "comedy"
+            ],
+            "version": 1
+        },
+        {
+            "id": 4,
+            "title": "The Breakfast Club",
+            "year": 2000,
+            "runtime": "96 mins",
+            "genres": [
+                "drama"
+            ],
+            "version": 13
+        }
+    ]
+}
+```
