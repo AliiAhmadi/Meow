@@ -84,3 +84,32 @@ Response:
     }
 }
 ```
+
+Now you have a bearer token. use that for every request. If you send a request to an protected route without any authirization token you will get error:
+
+```zsh
+curl --location 'http://127.0.0.1:4000/v1/movies/1' \
+--header 'Content-Type: application/json'
+```
+
+Response (with 401 status code):
+
+```json
+{
+    "error": "you must be authenticated to access this resource"
+}
+```
+
+Or if use an fake token:
+
+```zsh
+curl --location 'http://127.0.0.1:4000/v1/movies/1' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer 3PXHUW7RNJCOY5L7JIP7NXKZZ4'
+```
+
+```json
+{
+    "error": "invalid or missing authentication token"
+}
+```
