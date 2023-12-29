@@ -336,8 +336,8 @@ curl --location 'http://127.0.0.1:4000/debug' \
 {
     "cmdline": [
         "/tmp/go-build1112461546/b001/exe/api",
-        "-smtp-username=4a3738588400bf",
-        "-smtp-password=c3534223e2f462"
+        "-smtp-username=<-->",
+        "-smtp-password=<-->"
     ],
     "database": {
         "MaxOpenConnections": 25,
